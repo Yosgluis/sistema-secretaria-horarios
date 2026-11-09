@@ -6,6 +6,7 @@ from .base import Base
 
 if TYPE_CHECKING:
     from .representante import Representante
+    from .curso import Curso
     
 # Equivalente a tabla 'alumnos'
 class Alumno(Base):
@@ -22,6 +23,7 @@ class Alumno(Base):
 
 
     representante: Mapped["Representante"] = relationship(back_populates="alumnos")
+    curso: Mapped["Curso"] = relationship(back_populates="alumnos")
       
     # Clave foránea para establecer referencia a la tabla cursos  
     curso_id: Mapped[int] = mapped_column(ForeignKey("cursos.curso_id"))
