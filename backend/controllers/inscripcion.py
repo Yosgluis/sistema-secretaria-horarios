@@ -9,6 +9,9 @@ from backend.models.inscripcion import Inscripcion
 from backend.models.materia import Materia
 from backend.schemas.inscripcion import InscripcionCreate, InscripcionUpdate
 
+# MODIIFICADO: Error C2 se eliminaron las dependecias sync y se importo el models de Materia
+
+
 async def _verificar_referencias(
     db: AsyncSession,
     materia_id: int | None,
@@ -17,9 +20,10 @@ async def _verificar_referencias(
 ) -> None:
     materia = await db.get(Materia, materia_id) if materia_id is not None else None
     curso = await db.get(Curso, curso_id) if curso_id is not None else None
+    alumno = await db.get(Alumno, alumno_id) if curso_id is not None else None
     if materia_id is not None and materia is None:
         raise NoEncontrado(f"La materia {materia_id} no existe")
-    if alumno_id is not None and await db.get(Alumno, alumno_id) is None:
+    if alumno_id is not None and alumno is None:
         raise NoEncontrado(f"El alumno {alumno_id} no existe")
     if curso_id is not None and curso is None:
         raise NoEncontrado(f"El curso {curso_id} no existe")
@@ -104,57 +108,3 @@ async def eliminar_inscripcion(db: AsyncSession, id_inscripcion: int) -> None:
     await db.delete(inscripcion)
     await confirmar(db, "No se pudo eliminar la inscripción")
 
-def registrar_inscripcion(db: AsyncSession, datos: InscripcionCreate) -> Inscripcion:
-    inscripcion = db.query(Inscripcion).filter(
-        Inscripcion.alumno_id == datos.alumno_id,
-        Inscripcion.materia_id == datos.materia_id
-    ).first()
-
-    if inscripcion:
-        return None
-
-    try:
-        inscripcion = Inscripcion(**datos.model_dump())
-        db.add(inscripcion)
-        db.commit()
-        db.refresh(inscripcion)
-        return inscripcion
-    except IntegrityError:
-        db.rollback()
-        return None
-
-
-def obtener_inscripcion(db: AsyncSession, inscripcion_id: int) -> Inscripcion | None:
-    return db.get(Inscripcion, inscripcion_id)
-
-
-def listar_inscripciones(db: AsyncSession) -> list[Inscripcion]:
-    return db.query(Inscripcion).all()
-
-
-def actualizar_inscripcion(
-    db: AsyncSession,
-    inscripcion_id: int,
-    datos: InscripcionUpdate,
-) -> Inscripcion | None:
-    inscripcion = obtener_inscripcion(db, inscripcion_id)
-    if inscripcion is None:
-        return None
-
-    cambios = datos.model_dump(exclude_unset=True, exclude_none=True)
-    for campo, valor in cambios.items():
-        setattr(inscripcion, campo, valor)
-
-    db.commit()
-    db.refresh(inscripcion)
-    return inscripcion
-
-
-def eliminar_inscripcion(db: AsyncSession, inscripcion_id: int) -> Inscripcion | None:
-    inscripcion = obtener_inscripcion(db, inscripcion_id)
-    if inscripcion is None:
-        return None
-
-    db.delete(inscripcion)
-    db.commit()
-    return inscripcion

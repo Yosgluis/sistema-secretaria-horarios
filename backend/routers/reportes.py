@@ -1,16 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from sqlalchemy import func
+from sqlalchemy.orm import Session
 
-from database import get_db_session
-from models.notas import Nota
-from models.inscripcion import Inscripcion
-from models.alumno import Alumno
-from models.bloque import Bloque 
-from models.aula import Aula
-from models.profesor import Profesor
-from schemas.reportes_schema import ReporteEstudiantes, ReportePromedio, ReporteGeneral
-
+from backend.database import get_db_session
+from backend.models.alumno import Alumno
+from backend.models.aula import Aula
+from backend.models.bloque import Bloque
+from backend.models.notas import Nota
+from backend.models.profesor import Profesor
+from backend.schemas.reportes_schema import (
+    ReporteEstudiantes,
+    ReporteGeneral,
+    ReportePromedio,
+)
 
 router = APIRouter(prefix="/reportes", tags=["Reportes"])
 
